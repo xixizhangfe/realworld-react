@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import ListPagination from './listPagination';
+import ArticleAvatar from './article-avatar';
 
 const articles = (props) => {
   return (
@@ -18,26 +19,19 @@ const articles = (props) => {
               className="article-preview"
             >
               <div className="article-meta">
-                <Link
-                  to={`/@${article.author.username}`}
-                >
-                  <img src={article.author.image} alt="" />
-                </Link>
-                <div className="info">
-                  <Link
-                    to={`/@${article.author.username}`}
-                    className="author"
-                  >
-                    {article.author.username}
-                  </Link>
-                  <span className="date">{article.updatedAt}</span>
-                </div>
-                <button
-                  className="btn btn-outline-primary btn-sm pull-xs-right"
-                  onClick={addFavorite}
-                >
-                  <i className="ion-heart"></i> {article.favoritesCount}
-                </button>
+                <ArticleAvatar article={article} />
+                {
+                  props.isLogin
+                    ?
+                      <button
+                        className="btn btn-outline-primary btn-sm pull-xs-right"
+                        onClick={addFavorite}
+                      >
+                        <i className="ion-heart"></i> {article.favoritesCount}
+                      </button>
+                    :
+                      null
+                }
               </div>
               <Link to={`/article/${article.slug}`} className="preview-link">
                 <h1>{article.title}</h1>

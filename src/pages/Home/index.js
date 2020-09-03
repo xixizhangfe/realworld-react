@@ -4,6 +4,8 @@ import { Link, NavLink, withRouter } from 'react-router-dom';
 import commonFetch from '../../common/fetch.js';
 import Articles from '../../components/articles';
 
+import { UserContext } from '../../context';
+
 const YourFeedTab = ({ currentUser, isLogin }) => {
   return isLogin ? (
     <li className="nav-item">
@@ -56,6 +58,8 @@ const TagTab = (props) => {
 }
 
 class Home extends React.Component {
+  static contextType = UserContext;
+
   constructor (props) {
     super(props);
     this.state = {
@@ -167,8 +171,8 @@ class Home extends React.Component {
             <div className="feed-toggle">
               <ul className="nav nav-pills outline-active">
                 <YourFeedTab
-                  currentUser={this.props.currentUser}
-                  isLogin={this.props.isLogin}
+                  currentUser={this.context.currentUser}
+                  isLogin={this.context.isLogin}
                 />
                 <GlobalFeedTab />
                 <TagTab curTag={this.getCurTag()} />
@@ -182,6 +186,7 @@ class Home extends React.Component {
               articlesCount={this.state.articlesCount}
               setPage={this.setPage}
               addFavorite={this.addFavorite}
+              isLogin={this.context.isLogin}
             />
           </div>
 

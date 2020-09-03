@@ -4,19 +4,34 @@ import React from 'react';
 import commonFetch from '../../common/fetch.js';
 import { setUser } from '../../common/utils';
 
+import { UserContext } from '../../context';
+
 class Settings extends React.Component {
+  static contextType = UserContext;
+
   constructor (props) {
     super(props);
-    const { email, username, password, image, bio } = this.props.currentUser || {};
-
     this.state = {
+      email: '',
+      username: '',
+      password: '',
+      image: '',
+      bio: '',
+      newPassword: ''
+    };
+  }
+
+  componentDidMount () {
+    const { email, username, password, image, bio } = this.context.currentUser || {};
+
+    this.setState({
       email: email || '',
       username: username || '',
       password: password || '',
       image: image || '',
       bio: bio || '',
       newPassword: ''
-    };
+    });
   }
 
   onChange (field, e) {
@@ -119,7 +134,7 @@ class Settings extends React.Component {
               <hr />
               <button
                 className="btn btn-outline-danger"
-                onClick={this.props.onClickLogout}>
+                onClick={this.context.clearUser}>
                 Or click here to logout.
               </button>
             </div>

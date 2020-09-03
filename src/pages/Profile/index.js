@@ -4,7 +4,11 @@ import { withRouter, Link, NavLink } from 'react-router-dom';
 import commonFetch from '../../common/fetch.js';
 import Articles from '../../components/articles';
 
+import { UserContext } from '../../context';
+
 class Profile extends React.Component {
+  static contextType = UserContext;
+
   constructor (props) {
     super(props);
     this.state = {
@@ -26,7 +30,7 @@ class Profile extends React.Component {
     profile.username = this.props.match.params.username;
     this.setState({
       profile
-    })
+    });
 
     this.getProfile();
     this.getArticles();
@@ -107,6 +111,7 @@ class Profile extends React.Component {
 
   render () {
     const { profile } = this.state;
+    const { currentUser } = this.context;
     return (
       <div className="profile-page">
         <div className="user-info">
@@ -123,23 +128,29 @@ class Profile extends React.Component {
                   {profile.bio}
                 </p>
                 {
-                  profile.username === this.props.currentUser.username
+                  this.context.isLogin
                     ?
-                      <Link
-                        to="/settings"
-                        className="btn btn-sm btn-outline-secondary action-btn"
-                      >
-                        <i class="ion-gear-a"></i> Edit Profile Settings
-                      </Link>
+                      (
+                        currentUser && profile.username === currentUser.username
+                          ?
+                            <Link
+                              to="/settings"
+                              className="btn btn-sm btn-outline-secondary action-btn"
+                            >
+                              <i className="ion-gear-a"></i> Edit Profile Settings
+                            </Link>
+                          :
+                            <button
+                              className="btn btn-sm btn-outline-secondary action-btn"
+                              onClick={this.follow}
+                            >
+                              <i className="ion-plus-round"></i>
+                              &nbsp;
+                              {profile.following ? 'UnFollow' : 'Follow'} {profile.username}
+                            </button>
+                      )
                     :
-                      <button
-                        className="btn btn-sm btn-outline-secondary action-btn"
-                        onClick={this.follow}
-                      >
-                        <i className="ion-plus-round"></i>
-                        &nbsp;
-                        {profile.following ? 'Unfollow' : 'Follow'} {profile.username}
-                      </button>
+                      null
                 }
               </div>
             </div>
@@ -180,6 +191,7 @@ class Profile extends React.Component {
                 total={Math.ceil(this.state.articlesCount/ this.state.limit )}
                 setPage={this.setPage}
                 addFavorite={this.addFavorite}
+                isLogin={this.context.isLogin}
               />
             </div>
           </div>

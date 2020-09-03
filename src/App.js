@@ -15,7 +15,7 @@ import Profile from './pages/Profile';
 import Article from './pages/article';
 import Editor from './pages/editor';
 
-// const UserContext = React.createContext();
+import { UserContext } from './context';
 
 class App extends React.Component {
   constructor (props) {
@@ -77,48 +77,38 @@ class App extends React.Component {
       ?
         (
           <div>
-            <Header
-              isLogin={this.state.isLogin}
-              currentUser={this.state.currentUser}
-            />
-            <Switch>
-              <Route path="/login" component={Login} />
-              <Route path="/register" component={Register} />
-              {/* <UserContext.Provider value={this.state.currentUser}>
-                <Route path="/settings" component={Settings} />
-              </UserContext.Provider> */}
-              <Route path="/settings">
-                <Settings
-                  currentUser={this.state.currentUser}
-                  onClickLogout={this.clearUser}
-                />
-              </Route>
-              <Route path="/@:username">
-                <Profile
-                  isLogin={this.state.isLogin}
-                  currentUser={this.state.currentUser}
-                />
-              </Route>
-              <Route path="/@:username/favorites" component={Profile} />
-              <Route exact path="/editor">
-                <Editor />
-              </Route>
-              <Route path="/editor/:slug">
-                <Editor />
-              </Route>
-              <Route path="/article/:slug">
-                <Article
-                  isLogin={this.state.isLogin}
-                  currentUser={this.state.currentUser}
-                />
-              </Route>
-              <Route exact path="/">
-                <Home
-                  isLogin={this.state.isLogin}
-                  currentUser={this.state.currentUser}
-                />
-              </Route>
-            </Switch>
+            <UserContext.Provider
+              value={{
+                currentUser: this.state.currentUser,
+                isLogin: this.state.isLogin,
+                clearUser: this.clearUser,
+              }}
+            >
+              <Header />
+              <Switch>
+                <Route path="/login" component={Login} />
+                <Route path="/register" component={Register} />
+                <Route path="/settings">
+                  <Settings />
+                </Route>
+                <Route path="/@:username">
+                  <Profile />
+                </Route>
+                <Route path="/@:username/favorites" component={Profile} />
+                <Route exact path="/editor">
+                  <Editor />
+                </Route>
+                <Route path="/editor/:slug">
+                  <Editor />
+                </Route>
+                <Route path="/article/:slug">
+                  <Article />
+                </Route>
+                <Route exact path="/">
+                  <Home />
+                </Route>
+              </Switch>
+            </UserContext.Provider>
           </div>
         )
       :

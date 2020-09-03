@@ -1,73 +1,70 @@
 import React from 'react';
 import { withRouter, Link } from 'react-router-dom';
 
-import commonFetch from '../../common/fetch';
+import { UserContext } from '../../context';
 
-const ArticleMeta = ({ article, addFavorite, follow, isMine, deleteArticle }) => {
+import commonFetch from '../../common/fetch';
+import ArticleAvatar from '../../components/article-avatar';
+
+const ArticleMeta = ({ article, addFavorite, follow, isMine, deleteArticle, isLogin }) => {
   return (
     <div className="article-meta">
-      <Link
-        to={`/@${article.author.username}`}
-      >
-        <img src={article.author.image} alt="" />
-      </Link>
-      <div className="info">
-        <Link
-          to={`/@${article.author.username}`}
-          className="author"
-        >
-          {article.author.username}
-        </Link>
-        <span className="date">{article.createdAt}</span>
-      </div>
+      <ArticleAvatar article={article} />
 
       {
-        isMine
+        !isLogin
           ?
-            <>
-              <Link
-                to={`/editor/${article.slug}`}
-                className="btn btn-outline-secondary btn-sm"
-              >
-                <i className="ion-edit" />
-                &nbsp;
-                Edit Article
-              </Link>
-              <button
-                className="btn btn-outline-danger btn-sm"
-                onClick={deleteArticle}
-              >
-                <i className="ion-trash-a"></i>
-                &nbsp;
-                Delete Article
-              </button>
-            </>
+            null
           :
-            <>
-              <button
-                className="btn btn-sm btn-outline-secondary"
-                onClick={follow}
-              >
-                <i className="ion-plus-round"></i>
-                &nbsp;
-                {article.author.following ? 'Unfollow' : 'Follow'} {article.author.username} <span className="counter"></span>
-              </button>
-              &nbsp;&nbsp;
-              <button
-                className={ article.favorited ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline-primary' }
-                onClick={addFavorite}
-              >
-                <i className="ion-heart"></i>
-                &nbsp;
-                {article.favorited ? 'UnFavorite' : 'Favorite'} Post <span className="counter">({article.favoritesCount})</span>
-              </button>
-            </>
+            (isMine
+              ?
+                <>
+                  <Link
+                    to={`/editor/${article.slug}`}
+                    className="btn btn-outline-secondary btn-sm"
+                  >
+                    <i className="ion-edit" />
+                    &nbsp;
+                    Edit Article
+                  </Link>
+                  <button
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={deleteArticle}
+                  >
+                    <i className="ion-trash-a"></i>
+                    &nbsp;
+                    Delete Article
+                  </button>
+                </>
+              :
+                <>
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={follow}
+                  >
+                    <i className="ion-plus-round"></i>
+                    &nbsp;
+                    {article.author.following ? 'UnFollow' : 'Follow'} {article.author.username} <span className="counter"></span>
+                  </button>
+                  &nbsp;&nbsp;
+                  <button
+                    className={ article.favorited ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline-primary' }
+                    onClick={addFavorite}
+                  >
+                    <i className="ion-heart"></i>
+                    &nbsp;
+                    {article.favorited ? 'UnFavorite' : 'Favorite'} Post <span className="counter">({article.favoritesCount})</span>
+                  </button>
+                </>
+            )
       }
     </div>
   )
 }
 
 class Article extends React.Component {
+  static contextType = UserContext;
+
   constructor (props) {
     super(props);
     this.articleSlug = this.props.match.params.slug;
@@ -167,6 +164,7 @@ class Article extends React.Component {
 
   render () {
     const { article } = this.state;
+    const { currentUser } = this.context;
     return (
       <div className="article-page">
 
@@ -179,8 +177,9 @@ class Article extends React.Component {
               article={article}
               addFavorite={this.addFavorite}
               follow={this.follow}
-              isMine={this.props.currentUser.username === this.state.article.author.username}
+              isMine={currentUser && currentUser.username === this.state.article.author.username}
               deleteArticle={this.deleteArticle}
+              isLogin={this.context.isLogin}
             />
           </div>
         </div>
@@ -211,47 +210,61 @@ class Article extends React.Component {
 
           <hr />
 
-          <div className="article-actions">
-            {
-              this.props.currentUser.username === this.state.article.author.username
-                ? null
-                :
-                <ArticleMeta
-                  article={article}
-                  addFavorite={this.addFavorite}
-                  follow={this.follow}
-                />
-            }
+          {
+            this.context.isLogin
+              ?
+                <div className="article-actions">
+                  {
+                    currentUser && currentUser.username === this.state.article.author.username
+                      ? null
+                      :
+                      <ArticleMeta
+                        article={article}
+                        addFavorite={this.addFavorite}
+                        follow={this.follow}
+                        isLogin={this.context.isLogin}
+                      />
+                  }
 
-          </div>
+                </div>
+              :
+                null
+          }
 
           <div className="row">
             <div className="col-xs-12 col-md-8 offset-md-2">
-              <form className="card comment-form">
-                <div className="card-block">
-                  <textarea
-                    className="form-control"
-                    placeholder="Write a comment..."
-                    rows="3"
-                    value={this.state.comment}
-                    onChange={this.commentChange}
-                  ></textarea>
-                </div>
-                <div className="card-footer">
-                  <img
-                    src={this.props.currentUser.image}
-                    className="comment-author-img"
-                    alt=""
-                  />
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={this.postComment}
-                  >
-                  Post Comment
-                  </button>
-                </div>
-              </form>
-
+              {
+                this.context.isLogin
+                  ?
+                    <form className="card comment-form">
+                      <div className="card-block">
+                        <textarea
+                          className="form-control"
+                          placeholder="Write a comment..."
+                          rows="3"
+                          value={this.state.comment}
+                          onChange={this.commentChange}
+                        ></textarea>
+                      </div>
+                      <div className="card-footer">
+                        <img
+                          src={currentUser ? currentUser.image : ''}
+                          className="comment-author-img"
+                          alt=""
+                        />
+                        <button
+                          className="btn btn-sm btn-primary"
+                          onClick={this.postComment}
+                        >
+                          Post Comment
+                        </button>
+                      </div>
+                    </form>
+                  :
+                    <p>
+                      <Link to="/login">Sign in</Link>&nbsp;or&nbsp;<Link to="/register">sign up</Link>&nbsp;to add comments on this article.
+                    </p>
+              }
               {
                 this.state.comments.map((comment, index) => {
                   return (
@@ -278,7 +291,7 @@ class Article extends React.Component {
                         </Link>
                         <span className="date-posted">{comment.createdAt}</span>
                         {
-                          this.props.currentUser.username === comment.author.username
+                          currentUser && currentUser.username === comment.author.username
                             ?
                               (
                                 <span className="mod-options">

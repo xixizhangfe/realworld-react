@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { UserContext } from '../../context';
 
 class Header extends React.Component {
+  static contextType = UserContext;
+
   render () {
-    return this.props.isLogin ? (
+    return this.context.isLogin ? (
       <>
         <nav className="navbar navbar-light">
           <div className="container">
@@ -33,11 +36,11 @@ class Header extends React.Component {
               </li>
               <li className="nav-item">
                 <Link
-                  to={`/@${this.props.currentUser.username}`}
+                  to={`/@${this.context.currentUser.username}`}
                   className="nav-link"
                 >
-                  <img src={this.props.currentUser.image} className="user-pic" alt="" />
-                  {this.props.currentUser.username}
+                  <img src={this.context.currentUser.image} className="user-pic" alt="" />
+                  {this.context.currentUser.username}
                 </Link>
               </li>
             </ul>
